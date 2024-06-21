@@ -1,10 +1,25 @@
 package com.sinergia.challenge.entities;
 
+import com.sinergia.challenge.enums.Role;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
+import java.util.List;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "user")
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "native")
@@ -15,7 +30,7 @@ public class User {
     private String name;
 
     @Column(name = "lastName")
-    private String lasName;
+    private String lastName;
 
     @Column(name = "email")
     private  String email;
@@ -23,49 +38,37 @@ public class User {
     @Column(name = "password")
     private String password;
 
-    public User() {
+    @Enumerated(EnumType.STRING)
+    Role role;
+
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
-    public User(String name, String lasName, String email, String password) {
-        this.name = name;
-        this.lasName = lasName;
-        this.email = email;
-        this.password = password;
+    @Override
+    public String getUsername() {
+        return this.email;
     }
 
-    public Long getId() {
-        return id;
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
-    public String getName() {
-        return name;
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
     }
 
-    public String getLasName() {
-        return lasName;
-    }
-
-    public void setLasName(String lasName) {
-        this.lasName = lasName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
