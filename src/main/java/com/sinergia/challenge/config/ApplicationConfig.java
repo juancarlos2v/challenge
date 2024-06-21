@@ -24,13 +24,13 @@ public class ApplicationConfig {
         return config.getAuthenticationManager();
     }
 
-    /**@Bean
+    @Bean
     public AuthenticationProvider authenticationProvider(){
         DaoAuthenticationProvider authenticationProvider= new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userDetailService());
         authenticationProvider.setPasswordEncoder(passwordEncoder());
         return authenticationProvider;
-    }**/
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder(){
