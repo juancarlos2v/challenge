@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "user")
+@Table(name="user", uniqueConstraints = {@UniqueConstraint(columnNames = {"email"})})
 public class User implements UserDetails {
 
     @Id
@@ -26,16 +26,16 @@ public class User implements UserDetails {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "name")
+    @Column(name = "name",nullable = false)
     private String name;
 
-    @Column(name = "lastName")
+    @Column(name = "lastName",nullable = false)
     private String lastName;
 
-    @Column(name = "email")
+    @Column(name = "email",nullable = false)
     private  String email;
 
-    @Column(name = "password")
+    @Column(name = "password",nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)

@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AuthResponse {
-    String token;
-    String response;
-    Boolean success;
+public class MailRequest {
+    private String email;
+    private String subject;
+    private String message;
 }

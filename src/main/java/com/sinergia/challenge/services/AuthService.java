@@ -5,8 +5,12 @@ import com.sinergia.challenge.dto.LoginRequest;
 import com.sinergia.challenge.dto.RegisterRequest;
 import com.sinergia.challenge.entities.User;
 import com.sinergia.challenge.enums.Role;
+import com.sinergia.challenge.exceptions.DuplicatedEmailException;
+import com.sinergia.challenge.exceptions.InvalidSessionException;
 import com.sinergia.challenge.reposiories.UserRepository;
+import com.sinergia.challenge.utils.Validator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,32 +23,60 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final JwtService jwtService;
-    private  final PasswordEncoder passwordEncoder;
-    private  final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
 
     public AuthResponse login(LoginRequest request) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(),request.getPassword()));
-        UserDetails user=userRepository.findByEmail(request.getEmail()).orElseThrow();
-        String token= jwtService.getToken(user);
+        try {
+            Validator.isValidate(request.getEmail(), request.getPassword());
+
+        } catch (InvalidSessionException e) {
+            return AuthResponse.builder()
+                    .response(e.getMessage())
+                    .success(false)
+                    .build();
+        }
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+        UserDetails user = userRepository.findByEmail(request.getEmail()).orElseThrow();
+        String token = jwtService.getToken(user);
         return AuthResponse.builder()
                 .token(token)
+                .response("Login ok")
+                .success(true)
                 .build();
+
+
     }
 
     public AuthResponse register(RegisterRequest request) {
-        User user=User.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .name(request.getName())
-                .lastName(request.getLastName())
-                .role(Role.USER)
-                .build();
+        try {
+            Validator.isValidate(request.getEmail(), request.getPassword());
+            User user = User.builder()
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .name(request.getName())
+                    .lastName(request.getLastName())
+                    .role(Role.USER)
+                    .build();
+            userRepository.save(user);
+            return AuthResponse.builder()
+                    .token(jwtService.getToken(user))
+                    .response("Registro ok")
+                    .success(true)
+                    .build();
 
-        userRepository.save(user);
+        } catch (InvalidSessionException e) {
+            return AuthResponse.builder()
+                    .response(e.getMessage())
+                    .success(false)
+                    .build();
+        }
+        catch (DataIntegrityViolationException e){
+            return AuthResponse.builder()
+                    .response("Email en uso")
+                    .success(false)
+                    .build();
+        }
 
-
-        return AuthResponse.builder()
-                .token(jwtService.getToken(user))
-                .build();
     }
 }
