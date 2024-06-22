@@ -32,7 +32,8 @@ public class AuthService {
 
         } catch (InvalidSessionException e) {
             return AuthResponse.builder()
-                    .response(e.getMessage())
+                    .token(null)
+                    .response("Usuario/contraseña incorrecta")
                     .success(false)
                     .build();
         }
@@ -65,18 +66,20 @@ public class AuthService {
                     .success(true)
                     .build();
 
-        } catch (InvalidSessionException e) {
-            return AuthResponse.builder()
-                    .response(e.getMessage())
-                    .success(false)
-                    .build();
         }
         catch (DataIntegrityViolationException e){
             return AuthResponse.builder()
-                    .response("Email en uso")
+                    .token(null)
+                    .response("Email ya esta en uso")
                     .success(false)
                     .build();
         }
-
+        catch (InvalidSessionException e) {
+            return AuthResponse.builder()
+                    .token(null)
+                    .response("Usuario/contraseña incorrecta")
+                    .success(false)
+                    .build();
     }
+}
 }

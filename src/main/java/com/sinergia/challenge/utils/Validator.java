@@ -12,7 +12,7 @@ public class Validator {
 
     public static void isValidate(String email, String password) throws InvalidSessionException {
         if (!email.contains("@") || !pattern.matcher(password).matches()){
-            throw new InvalidSessionException("Usuario/contraseña incorrectos");
+            throw new InvalidSessionException("Usuario/contraseña incorrecta");
         }
     }
 
