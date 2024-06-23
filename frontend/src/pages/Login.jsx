@@ -1,15 +1,16 @@
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-import { useNavigate } from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
 import {useState} from 'react'
 import axios from 'axios'
+import {Col, Row} from "react-bootstrap";
 
 const Login = () => {
 
-    const baseURL="http://localhost:8080"
+    const baseURL = "http://localhost:8080"
     const navigate = useNavigate();
-    const [error,setError]=useState();
-    const [warning,setWarning]=useState(false);
+    const [error, setError] = useState();
+    const [warning, setWarning] = useState(false);
     const [user, setUser] = useState("");
     const [password, setPassword] = useState("");
     const datos = {
@@ -25,12 +26,13 @@ const Login = () => {
     };
 
 
-
-    const login=(event)=>{
+    const login = (event) => {
         event.preventDefault();
-        axios.post(`${baseURL}/auth/login`,datos )
+        console.log(datos)
+        axios.post(`${baseURL}/auth/login`, datos)
             .then((response) => {
                 console.log('Respuesta recibida:', response.data);
+                setWarning(false)
             })
             .catch((e) => {
                 setError(e.response.data.response)
@@ -40,30 +42,32 @@ const Login = () => {
     }
 
     return (
-        <Form onSubmit={login} noValidate >
-            <Form.Group className="mb-3" controlId="formBasicEmail"   >
-                <Form.Label>Email address</Form.Label>
-                <Form.Control type="email" placeholder="Enter email" value={user} onChange={handleUser} />
-                <Form.Text className="text-muted">
-                    We'll never share your email with anyone else.
-                </Form.Text>
+        <Form onSubmit={login} noValidate>
+            <Form.Group className="mb-3">
+                <Form.Label>Email</Form.Label>
+                <Form.Control type="email" placeholder=" " value={user} onChange={handleUser}/>
+                {/**<Form.Text className="text-muted">
+                 We'll never share your email with anyone else.
+                 </Form.Text>**/}
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formBasicPassword">
-                <Form.Label>Password</Form.Label>
-                <Form.Control type="password" placeholder="Password" value={password} onChange={handlePassword}/>
+                <Form.Label>Contraseña</Form.Label>
+                <Form.Control type="password" placeholder="" value={password} onChange={handlePassword}/>
             </Form.Group>
-            <button type="button" onClick={() => navigate('/reset')}  >
-            Olvide mi contraseña
-            </button>
-                    {warning && <p>{error}</p>}
+            <Form.Text>
+                {warning && <p className="text-danger">{error}</p>}
+            </Form.Text>
+            <Link to="/reset" style={{textDecoration: 'none'}}>Olvide mi contraseña </Link>
 
-                    <Button variant="primary" type="submit">
-                        Ingresar
-                    </Button>
-                    <Button variant="primary" type="submit" onClick={() => navigate('/register')}>
-                        Register
-                    </Button>
+            <Row className="g-3 mt-2">
+                <Button variant="primary" type="submit">
+                    Ingresar
+                </Button>
+                <Button variant="dark" type="submit" onClick={() => navigate('/register')}>
+                    Registrar
+                </Button>
+            </Row>
         </Form>
     );
 }

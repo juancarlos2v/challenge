@@ -13,9 +13,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -27,26 +30,25 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public AuthResponse login(LoginRequest request) {
+
         try {
             Validator.isValidate(request.getEmail(), request.getPassword());
-
-        } catch (InvalidSessionException e) {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+            UserDetails user = userRepository.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new InvalidSessionException("Usuario no encontrado"));
+            String token = jwtService.getToken(user);
+            return AuthResponse.builder()
+                    .token(token)
+                    .response("Login ok")
+                    .success(true)
+                    .build();
+        } catch (InvalidSessionException | AuthenticationException | NoSuchElementException e) {
             return AuthResponse.builder()
                     .token(null)
                     .response("Usuario/contraseña incorrecta")
                     .success(false)
                     .build();
         }
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-        UserDetails user = userRepository.findByEmail(request.getEmail()).orElseThrow();
-        String token = jwtService.getToken(user);
-        return AuthResponse.builder()
-                .token(token)
-                .response("Login ok")
-                .success(true)
-                .build();
-
-
     }
 
     public AuthResponse register(RegisterRequest request) {
@@ -66,20 +68,18 @@ public class AuthService {
                     .success(true)
                     .build();
 
-        }
-        catch (DataIntegrityViolationException e){
+        } catch (DataIntegrityViolationException e) {
             return AuthResponse.builder()
                     .token(null)
-                    .response("Email ya esta en uso")
+                    .response("El email ya esta en uso")
                     .success(false)
                     .build();
-        }
-        catch (InvalidSessionException e) {
+        } catch (InvalidSessionException e) {
             return AuthResponse.builder()
                     .token(null)
                     .response("Usuario/contraseña incorrecta")
                     .success(false)
                     .build();
+        }
     }
-}
 }
