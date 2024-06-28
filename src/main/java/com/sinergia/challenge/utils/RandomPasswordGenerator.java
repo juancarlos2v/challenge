@@ -33,10 +33,5 @@ public class RandomPasswordGenerator {
         return characters.charAt(index);
     }
 
-    public static void main(String[] args) {
-        String password = generatePassword();
-        System.out.println("Contraseña generada: " + password);
-        boolean matchesRegex = password.matches("^(?=.*[A-Z])(?=.*[a-z])(?=.*[@$!%*?&])[A-Za-z@$!%*?&]{8,}$");
-    }
 }
 
